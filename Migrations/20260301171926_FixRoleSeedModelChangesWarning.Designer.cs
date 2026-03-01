@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.Data;
 
@@ -11,9 +12,11 @@ using WebAPI.Data;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260301171926_FixRoleSeedModelChangesWarning")]
+    partial class FixRoleSeedModelChangesWarning
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,14 +55,14 @@ namespace WebAPI.Migrations
                         new
                         {
                             Id = "65c1fb98-1e43-4fae-9d2a-e24dc5cdeee2",
-                            ConcurrencyStamp = "c4608c7e-b64d-4e92-9366-267320c99bba",
+                            ConcurrencyStamp = "b100653c-5a52-4375-91cd-8ac98d39b37b",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
                             Id = "13facfcb-31d7-46dc-a095-2fe084d5dfce",
-                            ConcurrencyStamp = "e512cefb-cb31-419b-b5ee-8f5b8ec5d1bf",
+                            ConcurrencyStamp = "ded0fa7a-ad29-47d6-b124-59c687851c83",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -188,7 +191,6 @@ namespace WebAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
