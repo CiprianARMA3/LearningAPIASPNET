@@ -10,16 +10,16 @@ using WebAPI.Repository;
 using WebAPI.Service;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddOpenApi();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+
 builder.Services.AddOpenApi();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -34,11 +34,11 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(Options =>
 {
-    Options.Password.RequireDigit = false;
-    Options.Password.RequiredLength = 6;
-    Options.Password.RequireNonAlphanumeric = false;
-    Options.Password.RequireUppercase = false;
-    Options.Password.RequireLowercase = false;
+    Options.Password.RequireDigit = true;
+    Options.Password.RequiredLength = 8;
+    Options.Password.RequireNonAlphanumeric = true;
+    Options.Password.RequireUppercase = true;
+    Options.Password.RequireLowercase = true;
 
 }).AddEntityFrameworkStores<ApplicationDBContext>();
 
@@ -65,6 +65,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+
+
 builder.Services.AddScoped<IClientiRepository, ClientiRepository>();
 builder.Services.AddScoped<IOperazioniRepository, OperazioniRepository>();
 //builder.Services.AddScoped<IUtentiRepository, UtentiRepository>();
@@ -80,6 +83,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

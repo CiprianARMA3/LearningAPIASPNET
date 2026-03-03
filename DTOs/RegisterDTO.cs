@@ -11,6 +11,7 @@ namespace WebAPI.DTOs
         [Required, EmailAddress]
         public string? Email { get; set; }
         [Required]
+        [MinLength(8, ErrorMessage = "La password deve essere di almeno 8 caratteri.")]
         public string? Password { get; set; }
         [Required]
         public string? NumeroTelefono { get; set; }

@@ -16,30 +16,42 @@ namespace WebAPI.Repository
             _context = context;
         }
 
-        public async Task<ClientiDto> CreateClienteAsync(ClientiDto clienteDto)
+        public async Task<ClientiDto> CreateClienteAsync(ClientiDto clienteDto, string userId)
         {
-            _context.Clienti.Add(clienteDto.ToEntity());
-            _context.SaveChanges();
-            return clienteDto;
+            var entity = clienteDto.ToEntity();
+            entity.AppUserId = userId; // assign the current user as the owner
+            _context.Clienti.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity.ToDto();
         }
 
-        public async Task<bool> DeleteClienteAsync(int id)
+        public async Task<bool> DeleteClienteAsync(int id, string userId, bool isAdmin)
         {
             var cliente = await _context.Clienti.FindAsync(id);
             if (cliente == null)
             {
                 return false;
             }
+            // RLS: only the owner or an admin can delete
+            if (!isAdmin && cliente.AppUserId != userId)
+            {
+                return false;
+            }
             _context.Clienti.Remove(cliente);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<IEnumerable<ClientiDto>> GetAllClientiAsync(QueryElementClienti queryElement)
+        public async Task<IEnumerable<ClientiDto>> GetAllClientiAsync(QueryElementClienti queryElement, string userId, bool isAdmin)
         {
-            //var clienti = _context.Clienti.Select(c => c.ToDto()).ToList();
-
             var query = _context.Clienti.AsQueryable();
+
+            // RLS: non-admin users only see their own clienti
+            if (!isAdmin)
+            {
+                query = query.Where(c => c.AppUserId == userId);
+            }
+
             if (!string.IsNullOrEmpty(queryElement.Nome))
             {
                 query = query.Where(c => c.Nome.Contains(queryElement.Nome));
@@ -60,25 +72,37 @@ namespace WebAPI.Repository
             return clienti;
         }
 
-        public async Task<ClientiDto?> GetClienteByIdAsync(int id)
+        public async Task<ClientiDto?> GetClienteByIdAsync(int id, string userId, bool isAdmin)
         {
             var cliente = await _context.Clienti.FindAsync(id);
             if (cliente == null)
+            {
+                return null;
+            }
+            // RLS: non-admin users can only see their own clienti
+            if (!isAdmin && cliente.AppUserId != userId)
             {
                 return null;
             }
             return cliente.ToDto();
         }
 
-        public async Task<ClientiDto?> UpdateClienteAsync(int id, ClientiDto clienteDto)
+        public async Task<ClientiDto?> UpdateClienteAsync(int id, ClientiDto clienteDto, string userId, bool isAdmin)
         {
             var cliente = await _context.Clienti.FindAsync(id);
             if (cliente == null)
             {
                 return null;
             }
+            // RLS: only the owner or an admin can update
+            if (!isAdmin && cliente.AppUserId != userId)
+            {
+                return null;
+            }
             _context.Entry(cliente).CurrentValues.SetValues(clienteDto.ToEntity());
-            _context.SaveChanges();
+            // preserve the original owner
+            cliente.AppUserId = cliente.AppUserId;
+            await _context.SaveChangesAsync();
             return cliente.ToDto();
         }
     }
